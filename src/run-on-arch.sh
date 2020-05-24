@@ -2,20 +2,19 @@
 
 set -eo pipefail
 
-ARCH=$1
-DISTRO=$2
-COMMANDS=$3
+IMAGE=$1
+COMMANDS=$2
 COMMANDS="${COMMANDS//[$'\t\r\n']+/;}" #Replace newline with ;
-ADDITIONAL_ARGS=$4
+ADDITIONAL_ARGS=$3
 
 # Install support for new archs via qemu
 # Platforms: linux/amd64, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/arm/v7, linux/arm/v6
-sudo apt update -y && sudo apt install -y qemu qemu-user-static
+# sudo apt update -y && sudo apt install -y qemu qemu-user-static
 
-ACT_PATH=$(dirname $(dirname $(readlink -fm "$0")))
+# ACT_PATH=$(dirname $(dirname $(readlink -fm "$0")))
 
-docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-docker build . --file $ACT_PATH/Dockerfiles/Dockerfile.$ARCH.$DISTRO --tag multiarchimage 
+# docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+# docker build . --file $ACT_PATH/Dockerfiles/Dockerfile.$ARCH.$DISTRO --tag multiarchimage
 
 docker run \
   --workdir /github/workspace \
@@ -41,5 +40,5 @@ docker run \
   -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" \
   -v "${PWD}":"/github/workspace" \
   $ADDITIONAL_ARGS \
-  -t multiarchimage \
+  -t "$IMAGE" \
   /bin/bash -c "$COMMANDS"
